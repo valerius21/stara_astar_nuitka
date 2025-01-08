@@ -1,8 +1,9 @@
 from typing import Tuple, List, Optional, Dict
 import argparse
 from loguru import logger
-from time import time
+from time import time, time_ns
 import pandas as pd
+from tqdm import tqdm
 
 from numpy.typing import NDArray
 
@@ -168,5 +169,41 @@ def test_main():
     logger.info(f"Time taken: {end_time - start_time} seconds")
 
 
-def pkl_main(pkl_path: str):
-    df = pd.read_pickle(pkl_path)
+results = []
+
+
+def process_row(row):
+    maze: VMaze = row["maze"]
+    seed: int = row["seed"]
+    start = time_ns()
+    AStarNuitka(maze).find_path(maze.start, maze.goal)
+    end = time_ns()
+    res = {
+        "seed": seed,
+        "nuitka": (end - start),
+    }
+    logger.info(f"Maze seed={seed}")
+    results.append(res)
+    return res
+
+
+def pkl_main():
+    args = argparse.ArgumentParser()
+    args.add_argument(
+        "--maze-file",
+        type=str,
+        help="Path to the maze file",
+    )
+    args = args.parse_args()
+    df = pd.read_pickle(args.maze_file)
+
+    tqdm.pandas(desc="Processing mazes")
+
+    df = df.progress_apply(process_row, axis=1)
+    df = pd.DataFrame(results)
+    df.to_json(f"{args.maze_file}.json", orient="records")
+    return 0
+
+
+if __name__ == "__main__":
+    pkl_main()

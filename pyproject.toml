@@ -10,6 +10,7 @@ python = "^3.12"
 stara-maze-generator = { git = "https://github.com/valerius21/Stara-Maze-Generator.git", branch = "numpy-2.1.3" }
 nuitka = "^2.5.9"
 pandas = "^2.2.3"
+tqdm = "^4.67.1"
 
 
 [build-system]
