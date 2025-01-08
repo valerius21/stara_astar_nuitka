@@ -2,6 +2,7 @@ from typing import Tuple, List, Optional, Dict
 import argparse
 from loguru import logger
 from time import time
+import pandas as pd
 
 from numpy.typing import NDArray
 
@@ -144,7 +145,7 @@ class AStarNuitka(PathfinderBase):
         return None
 
 
-if __name__ == "__main__":
+def test_main():
     args = argparse.ArgumentParser()
     args.add_argument(
         "--file",
@@ -165,3 +166,7 @@ if __name__ == "__main__":
     logger.info([(int(x), int(y)) for (x, y) in path])
     logger.info(f"Path length: {len(path)}")
     logger.info(f"Time taken: {end_time - start_time} seconds")
+
+
+def pkl_main(pkl_path: str):
+    df = pd.read_pickle(pkl_path)
