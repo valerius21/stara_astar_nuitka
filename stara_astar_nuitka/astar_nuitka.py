@@ -1,14 +1,13 @@
-from typing import Tuple, List, Optional, Dict
 import argparse
-from loguru import logger
 from time import time, time_ns
+from typing import Dict, List, Optional, Tuple
+
 import pandas as pd
-from tqdm import tqdm
-
+from loguru import logger
 from numpy.typing import NDArray
-
-from stara_maze_generator.vmaze import VMaze
 from stara_maze_generator.pathfinder.base import PathfinderBase
+from stara_maze_generator.vmaze import VMaze
+from tqdm import tqdm
 
 
 class AStarNuitka(PathfinderBase):
@@ -118,23 +117,18 @@ class AStarNuitka(PathfinderBase):
             # Check all neighbors
             neighbors = self.maze.get_cell_neighbours(*current_pos)
             for next_pos in neighbors:
-                if next_pos is None:  # Skip if out of bounds
+                if next_pos is None:  # out of bounds
                     continue
 
                 x, y, value = next_pos
                 next_pos = (x, y)
 
-                # Skip walls and already processed nodes
                 if value == 0 or next_pos in closed_set:
                     continue
 
-                # Calculate tentative g_score for this neighbor
-                # All edges have weight 1 in this implementation
                 tentative_g = g_scores[current_pos] + 1
 
-                # If we found a better path to this neighbor
                 if next_pos not in g_scores or tentative_g < g_scores[next_pos]:
-                    # Update the path
                     came_from[next_pos] = current_pos
                     g_scores[next_pos] = tentative_g
                     f_scores[next_pos] = tentative_g + self.manhattan_distance(
@@ -142,7 +136,6 @@ class AStarNuitka(PathfinderBase):
                     )
                     open_set.add(next_pos)
 
-        # If we get here, no path exists
         return None
 
 
