@@ -346,3 +346,6 @@ cython_debug/
 *_maze.html
 *_maze.json
 *.bin
+*.dist
+*.build
+*.onefile-build

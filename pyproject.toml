@@ -12,8 +12,8 @@ nuitka = "^2.5.9"
 pandas = "^2.2.3"
 tqdm = "^4.67.1"
 
-[tool.poetry.scripts]
-build_nuitka = "python -m nuitka --follow-imports --standalone --onefile ./stara_astar_nuitka/astar_nuitka.py"
+# [tool.poetry.scripts]
+# build_nuitka = "python -m nuitka --follow-imports --standalone --onefile ./stara_astar_nuitka/astar_nuitka.py"
 
 
 [build-system]
