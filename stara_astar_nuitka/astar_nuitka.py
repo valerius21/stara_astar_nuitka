@@ -1,5 +1,5 @@
 import argparse
-from time import time, time_ns
+from time import perf_counter_ns, time
 from typing import Dict, List, Optional, Tuple
 
 import pandas as pd
@@ -165,18 +165,20 @@ def test_main():
 results = []
 
 
-def process_row(row):
+def process_row(row, N=1_000):
     maze: VMaze = row["maze"]
     seed: int = row["seed"]
-    start = time_ns()
-    AStarNuitka(maze).find_path(maze.start, maze.goal)
-    end = time_ns()
+    solver = AStarNuitka(maze)
+    start = perf_counter_ns()
+    for _ in range(N):
+        solver.find_path(maze.start, maze.goal)
+    end = perf_counter_ns()
     res = {
         "seed": seed,
-        "nuitka": (end - start),
+        "nuitka": (end - start) / N,
     }
-    logger.info(f"Maze seed={seed}")
     results.append(res)
+    logger.info(f"Maze seed={seed}")
     return res
 
 
