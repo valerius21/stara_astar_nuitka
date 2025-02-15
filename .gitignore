@@ -349,3 +349,4 @@ cython_debug/
 *.dist
 *.build
 *.onefile-build
+maze_*_*-*.json
