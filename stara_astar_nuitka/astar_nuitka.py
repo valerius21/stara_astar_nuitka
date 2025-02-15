@@ -1,13 +1,13 @@
 import argparse
+import json
 from time import perf_counter_ns, time
 from typing import Dict, List, Optional, Tuple
+from uuid import uuid4
 
-import pandas as pd
 from loguru import logger
 from numpy.typing import NDArray
 from stara_maze_generator.pathfinder.base import PathfinderBase
 from stara_maze_generator.vmaze import VMaze
-from tqdm import tqdm
 
 
 class AStarNuitka(PathfinderBase):
@@ -182,21 +182,44 @@ def process_row(row, N=1_000):
     return res
 
 
+def process_maze(seed: int, size: int, start: tuple, goal: tuple, N=1_000):
+    maze: VMaze = VMaze(seed, size, start, goal)
+    solver = AStarNuitka(maze)
+    start_time = perf_counter_ns()
+    for _ in range(N):
+        solver.find_path(maze.start, maze.goal)
+    end_time = perf_counter_ns()
+    res = {
+        "seed": seed,
+        "nuitka": (end_time - start_time) / N,
+    }
+    results.append(res)
+    logger.info(f"Maze seed={seed}")
+    return res
+
+
 def pkl_main():
     args = argparse.ArgumentParser()
+    args.add_argument("--maze-seed", type=int, help="seed of the maze", required=True)
+    args.add_argument("--maze-size", type=int, help="size of the maze", required=True)
     args.add_argument(
-        "--maze-file",
-        type=str,
-        help="Path to the maze file",
+        "--benchmark-id", type=str, help="id of the run", default=str(uuid4())
     )
+
     args = args.parse_args()
-    df = pd.read_pickle(args.maze_file)
+    seed = args.maze_seed
+    msize = args.maze_size
+    start = (0, 0)
+    end = (msize - 1, msize - 1)
 
-    tqdm.pandas(desc="Processing mazes")
+    logger.info(f"processing maze {seed} ({msize}x{msize})")
+    data = process_maze(seed, msize, start, end)
 
-    df = df.progress_apply(process_row, axis=1)
-    df = pd.DataFrame(results)
-    df.to_json(f"{args.maze_file}.json", orient="records")
+    with open(f"maze_{seed}_{args.benchmark_id}.json", "w") as f:
+        logger.info(f"Write to file maze_{seed}_{args.benchmark_id}.json")
+        json.dump(data, f, ensure_ascii=True)
+
+    logger.info("done")
     return 0
 
 
