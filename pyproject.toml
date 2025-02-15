@@ -9,8 +9,7 @@ readme = "README.md"
 python = "^3.12"
 stara-maze-generator = { git = "https://github.com/valerius21/Stara-Maze-Generator.git", branch = "numpy-2.1.3" }
 nuitka = "^2.5.9"
-pandas = "^2.2.3"
-tqdm = "^4.67.1"
+numpy = "2.1.3"
 
 # [tool.poetry.scripts]
 # build_nuitka = "python -m nuitka --follow-imports --standalone --onefile ./stara_astar_nuitka/astar_nuitka.py"
