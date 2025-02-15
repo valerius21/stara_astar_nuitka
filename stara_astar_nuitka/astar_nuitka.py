@@ -1,5 +1,5 @@
 import argparse
-import json
+import os
 from time import perf_counter_ns, time
 from typing import Dict, List, Optional, Tuple
 from uuid import uuid4
@@ -185,10 +185,12 @@ def process_row(row, N=1_000):
 def process_maze(seed: int, size: int, start: tuple, goal: tuple, N=1_000):
     maze: VMaze = VMaze(seed, size, start, goal)
     solver = AStarNuitka(maze)
+    logger.info("inner")
     start_time = perf_counter_ns()
     for _ in range(N):
         solver.find_path(maze.start, maze.goal)
     end_time = perf_counter_ns()
+    logger.info("outer")
     res = {
         "seed": seed,
         "nuitka": (end_time - start_time) / N,
@@ -205,6 +207,7 @@ def pkl_main():
     args.add_argument(
         "--benchmark-id", type=str, help="id of the run", default=str(uuid4())
     )
+    args.add_argument("--N", type=int, help="number of iterations", default=1_000)
 
     args = args.parse_args()
     seed = args.maze_seed
@@ -213,11 +216,16 @@ def pkl_main():
     end = (msize - 1, msize - 1)
 
     logger.info(f"processing maze {seed} ({msize}x{msize})")
-    data = process_maze(seed, msize, start, end)
+    data = process_maze(seed, msize, start, end, N=args.N)
 
-    with open(f"maze_{seed}_{args.benchmark_id}.json", "w") as f:
-        logger.info(f"Write to file maze_{seed}_{args.benchmark_id}.json")
-        json.dump(data, f, ensure_ascii=True)
+    path = f"maze_{args.benchmark_id}.csv"
+    if not os.path.exists(path):
+        with open(path, "a") as f:
+            f.writelines(["seed,times\n"])
+
+    with open(path, "a") as f:
+        logger.info(f"Write to file maze_{args.benchmark_id}.csv")
+        f.write(f"{data['seed']},{data['nuitka']}\n")
 
     logger.info("done")
     return 0
